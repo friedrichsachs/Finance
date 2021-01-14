@@ -1,0 +1,38 @@
+import math
+import numpy as np
+import pandas as pd
+from pandas_datareader import data as pdr
+from matplotlib import pyplot as plt
+from numpy import genfromtxt
+
+
+def compute_variance_minimizing_pf():
+    titles = list(range(1,500))
+    m = len(titles)
+    n = len(pd.read_csv("s&p500_varcov.csv").columns)
+    varcov = np.genfromtxt('s&p500_varcov.csv', delimiter=',', skip_header=True, skip_footer=n-m-1, usecols= titles)
+    
+    
+    inverse = np.linalg.inv(varcov)
+    ones = np.ones(m, dtype=int)
+
+    #compute weights from FOC of Lagrangian 
+    nominator = np.matmul(inverse, ones)
+    denom = np.matmul(np.matmul(ones, inverse),ones.transpose())
+    weights = nominator/denom
+
+    #create dict for convenience
+    firms_in_pf = list(pd.read_csv("s&p500_varcov.csv").columns[1:m+1])
+    output = dict(zip(firms_in_pf, weights))
+    print(output)
+
+    ##total Variance of Portfolio
+    pf_variance = np.matmul(np.matmul(weights.transpose(),varcov), weights)
+    
+    #benchmark: weights are simply 1/m
+    bm = np.array(([1/m] * m))
+    bm_variance = np.matmul(np.matmul(bm.transpose(), varcov), bm)
+    
+    print("Portfolio vs. Benchmark:\nBefore",bm_variance, "\nAfter", pf_variance)
+
+compute_variance_minimizing_pf()
