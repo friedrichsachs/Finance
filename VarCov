@@ -1,0 +1,31 @@
+import math
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
+def compute_varcov():
+    df = pd.read_csv("sp500_log_returns.csv", index_col="Date")
+    df.fillna(0, inplace=True)
+    df.replace("", 0, inplace=True)
+    # list with tickers in this csv
+    ticker_List = df.columns
+    # list with dates
+    dates = list(df.index)
+    n = len(dates)
+
+    #create dataframe for returns of past year and compute varcov
+
+    df_1y = df.loc[dates[n-256:n], ticker_List]
+
+    varcov = df_1y.corr()
+    print(varcov.head())
+    varcov.to_csv("s&p500_varcov.csv")
+
+    #compute heatmap
+
+    plt.pcolor(varcov)
+    plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
+    plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns)
+    plt.show()
+
+compute_varcov()
