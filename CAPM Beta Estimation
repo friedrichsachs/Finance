@@ -1,0 +1,29 @@
+import math
+import numpy as np
+import pandas as pd
+from pandas_datareader import data as pdr
+from matplotlib import pyplot as plt
+
+
+def compute_betas():
+
+    #import data 
+    df = pd.read_csv("sp500_log_returns.csv", index_col="Date")
+    df.fillna(0, inplace=True)
+    df.replace("",0, inplace=True)
+    # list with tickers in this csv
+    ticker_List = df.columns
+    # list with dates
+    dates = list(df.index)
+    n = len(dates)
+
+    beta = pd.DataFrame(np.nan, index=["Beta"], columns=ticker_List)
+    cov = df.cov()
+    var = df.var()
+    for ticker in ticker_List:
+        beta.loc["Beta", ticker] = cov.loc[ticker, "Market"]/var.loc[ticker]
+
+    print(beta.head())
+
+    beta.to_csv("MarketBetas")
+compute_betas()
